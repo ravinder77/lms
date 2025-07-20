@@ -1,0 +1,1 @@
+ALTER TABLE "courses" ADD COLUMN "tags" jsonb DEFAULT '[]'::jsonb NOT NULL;

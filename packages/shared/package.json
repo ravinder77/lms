@@ -1,0 +1,23 @@
+{
+  "name": "@lms/shared",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "ravinder",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "exports": {
+    ".": "./src",
+    "./jwt": "./src/jwt.ts",
+    "./types": "./src/types.ts"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10"
+  }
+}

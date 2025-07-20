@@ -1,0 +1,1 @@
+ALTER TABLE "courses" DROP COLUMN "co_instructors";

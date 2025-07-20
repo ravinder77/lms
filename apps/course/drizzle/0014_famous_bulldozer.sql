@@ -1,0 +1,1 @@
+ALTER TABLE "categories" ALTER COLUMN "slug" SET DATA TYPE text;
