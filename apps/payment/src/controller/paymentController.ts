@@ -1,13 +1,13 @@
 import {Request, Response} from "express";
 import {Stripe} from 'stripe';
 
-
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+const COURSE_SERVICE_URL = process.env.COURSE_SERVICE_URL!;
 
 
 // create Payment Intent
 async function createPaymentIntent (req: Request, res: Response): Promise<void> {
-
 
     const {amount, currency = "usd", metadata={}} = req.body;
 
@@ -61,6 +61,7 @@ async function confirmPayment (req: Request, res: Response):Promise<void>  {
         const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
             payment_method: paymentMethodId,
             return_url: process.env.RETURN_URL || "http://localhost:3000/success",
+
         })
 
         res.status(200).json({
@@ -78,5 +79,8 @@ async function confirmPayment (req: Request, res: Response):Promise<void>  {
 
 }
 
+async function createCheckoutSession (req: Request, res: Response): Promise<void> {}
 
-export {createPaymentIntent, confirmPayment};
+
+
+export {createPaymentIntent, confirmPayment, createCheckoutSession};

@@ -1,9 +1,14 @@
 import {eq, sql} from 'drizzle-orm';
 import {db} from 'src/db/index.js';
+import axios from 'axios';
 import {Course, courses, NewCourse, NewSection, sections,} from 'src/db/schema.js';
 import {CreateCourseInput, CreateSectionInput,} from 'src/schema/courseValidation.js';
+import * as process from "node:process";
+
+const PAYMENT_URL = process.env.PAYMENT_SERVICE_URL || "http://localhost:4003/api/v1";
 
 export class CourseService {
+
   async createCourse(
     data: CreateCourseInput,
     instructorId: string
@@ -60,5 +65,36 @@ export class CourseService {
 
       return section;
     });
+  }
+
+  async enroll(courseId: number, studentId: string) {
+
+    const [course] = await db.select({
+      price: courses.price,
+      currency: courses.currency,
+    }).from(courses).where(eq(courses.id, courseId));
+
+    if(!course) {
+      throw new Error('Course not found');
+    }
+
+    const amountInCents = Number(course.price) * 100;
+
+    const processPayment = await axios.post(`${PAYMENT_URL}/payments/create-intent`, {
+      courseId,
+      studentId,
+      amount: amountInCents,
+      currency: course.currency.toLowerCase(),
+    });
+
+    const {clientSecret, paymentIntentId} = processPayment.data;
+
+    // save paymentIntentId to database
+
+    return {
+      clientSecret,
+    }
+
+
   }
 }

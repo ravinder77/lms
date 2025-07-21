@@ -9,12 +9,12 @@ import { errorMiddleware } from './middleware/errorMiddleware.js';
 dotenv.config();
 const app = express();
 
-const PORT = process.env.PORT || 4002;
+const PORT = process.env.PORT!;
 const JWT_SECRET = process.env.JWT_SECRET!;
 
 // cors options
 const corsOptions = {
-  origin: ['http://localhost:4000'],
+  origin: "*",
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],

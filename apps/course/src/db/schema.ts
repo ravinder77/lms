@@ -53,10 +53,9 @@ export const courses = pgTable(
       .$type<string[]>()
       .default([])
       .notNull(),
-
     coverImageUrl: text('cover_image_url').notNull(),
     previewVideoUrl: text('preview_video_url').notNull(),
-
+    studentsEnrolled: integer('students_enrolled').default(0).notNull(),
     //pricing
     price: numeric('price', { precision: 10, scale: 2 })
       .default('0.00')
@@ -187,6 +186,24 @@ export const resources = pgTable(
 );
 
 
+export const enrollments = pgTable("enrollments", {
+    id: serial('id').primaryKey(),
+    courseId: integer('course_id').notNull(),
+    studentId: varchar('student_id').notNull(),
+    paymentId: varchar('payment_id').notNull(),
+    enrolledAt: timestamp('enrolled_at').defaultNow(),
+},(table) => [
+    index('enrollment_course_id_idx').on(table.courseId),
+    index('enrollment_student_id_idx').on(table.studentId),
+    unique('unique_student_course_enrollment').on(table.courseId, table.studentId),
+    foreignKey({
+        name: 'enrollments_course_id_fk',
+        columns: [table.courseId],
+        foreignColumns: [courses.id],
+    })
+])
+
+
 
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
   parent: one(categories, {
@@ -232,6 +249,14 @@ export const resourcesRelations = relations(resources, ({ one }) => ({
     references: [lessons.id],
   }),
 }));
+
+
+export const enrollmentRelations = relations(enrollments, ({ one }) => ({
+    course: one(courses, {
+        fields: [enrollments.courseId],
+        references: [courses.id],
+    })
+}))
 
 
 export type Course = typeof courses.$inferSelect; // this will be return when we query the db

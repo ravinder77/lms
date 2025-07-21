@@ -14,7 +14,7 @@ const courseController = new CourseController();
 router.post(
   '/create',
   authenticateUser,
-  requireRole('instructor'),
+  await requireRole('instructor'),
   validate(createCourseSchema),
   asyncHandler(courseController.createCourse)
 );
@@ -22,14 +22,21 @@ router.post(
 router.post(
   '/:courseId/sections',
   authenticateUser,
-  requireRole('instructor'),
+  await requireRole('instructor'),
   validate(createSectionSchema),
   asyncHandler(courseController.createSection)
 );
 
-router.post("/:courseId/sections/:sectionId/lessons",  authenticateUser, requireRole('instructor'), asyncHandler(courseController.createLesson));
+router.post(
+    "/:courseId/sections/:sectionId/lessons",
+    authenticateUser,
+    await requireRole('instructor'),
+    asyncHandler(courseController.createLesson)
+);
 
 
+
+router.post("/enroll/:courseId", authenticateUser, await requireRole('student'), asyncHandler(courseController.enrollStudent))
 
 
 export default router;

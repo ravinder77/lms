@@ -36,7 +36,7 @@ async function authenticateUser(req: Request, res: Response, next: NextFunction)
 
 
 async function requireRole (role: string){
-	return (req: Request, res: Response, next: NextFunction) => {
+	return  (req: Request, res: Response, next: NextFunction) => {
 		if (req.user?.role !== role) {
 			res.status(403).json({ message: 'Forbidden' });
 			return;

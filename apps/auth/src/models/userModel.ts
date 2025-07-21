@@ -77,6 +77,7 @@ UserSchema.pre('save', async function (next) {
   try {
     const salt = await bcrypt.genSalt(10);
     const password = typeof this.password == 'string' ? this.password : '';
+    //
     this.password = await bcrypt.hash(password, salt);
     next();
   } catch (error) {

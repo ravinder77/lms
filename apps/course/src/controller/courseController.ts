@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import type { Course, Section } from 'src/db/schema.js';
 import {
   CreateCourseInput,
@@ -80,5 +80,35 @@ export class CourseController {
   }
 
   async createLesson(req: Request, res: Response): Promise<void> {}
+
+  async enrollStudent(req: Request, res: Response, ): Promise<void> {
+
+    const courseId = parseFloat(req.params.courseId as string);
+    const studentId = req.user?.userId;
+    if (!studentId) {
+      res.status(401).json({
+        success: false,
+        message: 'Unauthorized to perform this operation',
+      })
+      return;
+    }
+    if(!courseId) {
+      res.status(401).json({
+        success: false,
+        message: 'Course id not found',
+      })
+    }
+
+    const result = await this.courseService.enroll(courseId, studentId);
+
+    const response: ApiResponse<string> = {
+      success: true,
+      message: 'Student enrolled successfully',
+      data: result.clientSecret
+    }
+
+    res.status(201).json(response);
+
+  }
 
 }
