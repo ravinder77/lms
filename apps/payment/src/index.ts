@@ -4,8 +4,8 @@ import dotenv from 'dotenv';
 import helmet from 'helmet';
 import paymentRouter from "./routes/paymentRoutes.js";
 import webhookRouter from "./routes/webhookRoutes.js";
-
 dotenv.config();
+
 const app: Express = express();
 const PORT = process.env.PORT!
 
@@ -17,10 +17,23 @@ app.use(cors({
 app.use(helmet());
 
 // webhook endpoint needs raw body, place it before express.json
-app.use("/webhooks", express.raw({type: "application/json"}), webhookRouter);
+app.use("/webhooks", express.raw({type: "application/json"}));
+app.use("/webhooks", webhookRouter);
+
 
 app.use(express.json());
 app.use("/api/v1/payments", paymentRouter);
+
+
+// GRACEFUL SHUTDOWN
+process.on("SIGINT", () => {
+    console.log("SIGINT RECEIVED. SHUTTING DOWN GRACEFULLY");
+    process.exit(0);
+})
+
+process.on("SIGTERM", () => {
+    console.log("SIGTERM RECEIVED. SHUTTING DOWN GRACEFULLY");
+})
 
 
 app.listen(PORT, () => {

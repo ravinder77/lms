@@ -5,7 +5,7 @@ const router = Router();
 
 router.post("/create-checkout-session", createCheckoutSession)
 router.post("/create-intent", createPaymentIntent);
-router.post("/confirm", confirmPayment);
+router.post("/confirm/:paymentIntentId", confirmPayment);
 
 
 export default router;

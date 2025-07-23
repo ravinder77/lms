@@ -7,6 +7,10 @@ import {
 import { CourseService } from 'src/services/courseService.js';
 import { ApiResponse } from '@lms/shared/types';
 
+
+
+
+
 export class CourseController {
   private courseService: CourseService;
 
@@ -15,12 +19,14 @@ export class CourseController {
 
     this.createCourse = this.createCourse.bind(this);
     this.createSection = this.createSection.bind(this);
+    this.getCourse = this.getCourse.bind(this);
+    this.createLesson = this.createLesson.bind(this);
+    this.enrollStudent = this.enrollStudent.bind(this);
+
+
   }
 
-  async createCourse(
-    req: Request,
-    res: Response,
-  ): Promise<void> {
+  async createCourse(req: Request, res: Response,): Promise<void> {
     const instructorId = req.user?.userId;
 
     if (!instructorId) {
@@ -44,10 +50,31 @@ export class CourseController {
     res.status(201).json(response);
   }
 
-  async createSection(
-    req: Request,
-    res: Response,
-  ): Promise<void> {
+  async getCourse(req: Request, res: Response): Promise<void> {
+
+    const courseId = parseInt(<string>req.params?.courseId);
+
+    if (!courseId) {
+      res.status(401).json({
+        success: false,
+        message: 'Could not find course with this id'
+      })
+      return;
+    }
+
+    const course = await this.courseService.getCourseById(courseId);
+
+    const response: ApiResponse<Course> = {
+      success: true,
+      message: 'Course get successfully',
+      data: course,
+
+    }
+
+    res.status(200).json(response);
+  }
+
+  async createSection(req: Request, res: Response,): Promise<void> {
     const courseId = parseFloat(req.params?.courseId as string);
     const instructorId = req.user?.userId;
     if (isNaN(courseId)) {
@@ -84,8 +111,9 @@ export class CourseController {
   async enrollStudent(req: Request, res: Response, ): Promise<void> {
 
     const courseId = parseFloat(req.params.courseId as string);
-    const studentId = req.user?.userId;
-    if (!studentId) {
+    const userId = req.user?.userId;
+
+    if (!userId) {
       res.status(401).json({
         success: false,
         message: 'Unauthorized to perform this operation',
@@ -99,15 +127,39 @@ export class CourseController {
       })
     }
 
-    const result = await this.courseService.enroll(courseId, studentId);
+    const result = await this.courseService.handleEnrollment(courseId, userId);
 
-    const response: ApiResponse<string> = {
+    const response: ApiResponse<{clientSecret: string, enrollmentId: number }> = {
       success: true,
       message: 'Student enrolled successfully',
-      data: result.clientSecret
+      data: result
     }
 
     res.status(201).json(response);
+
+  }
+
+  async paymentCallback(req: Request, res: Response): Promise<void> {
+
+    const {status, enrollmentId} = req.body;
+
+    if(!status || !enrollmentId) {
+      res.status(401).json({
+        success: false,
+        message: 'Missing required parameter',
+      })
+      return;
+    }
+
+    const result = await this.courseService.handlePaymentCallback(status, enrollmentId);
+
+    if(result.success) {
+      res.redirect(`/payment-success?status=success&enrollmentId=${enrollmentId}`);
+    } else {
+      res.redirect(`/payment-failure?status=failed&enrollmentId=${enrollmentId}`);
+    }
+
+
 
   }
 

@@ -19,6 +19,12 @@ router.post(
   asyncHandler(courseController.createCourse)
 );
 
+router.post('/payment-callback', asyncHandler(courseController.paymentCallback));
+
+router.get("/:courseId", asyncHandler(courseController.getCourse));
+
+
+
 router.post(
   '/:courseId/sections',
   authenticateUser,
@@ -27,6 +33,8 @@ router.post(
   asyncHandler(courseController.createSection)
 );
 
+router.post("/:courseId/enroll", authenticateUser, await requireRole('student'), asyncHandler(courseController.enrollStudent))
+
 router.post(
     "/:courseId/sections/:sectionId/lessons",
     authenticateUser,
@@ -34,9 +42,6 @@ router.post(
     asyncHandler(courseController.createLesson)
 );
 
-
-
-router.post("/enroll/:courseId", authenticateUser, await requireRole('student'), asyncHandler(courseController.enrollStudent))
 
 
 export default router;

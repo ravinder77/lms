@@ -36,6 +36,8 @@ export const resourceTypeEnum = pgEnum('resource_type', [
   'other',
 ]);
 
+export const enrollmentEnum = pgEnum('enrollment_status', ["pending", "success", "failed", "cancelled"]);
+
 export const courses = pgTable(
   'courses',
   {
@@ -189,13 +191,15 @@ export const resources = pgTable(
 export const enrollments = pgTable("enrollments", {
     id: serial('id').primaryKey(),
     courseId: integer('course_id').notNull(),
-    studentId: varchar('student_id').notNull(),
-    paymentId: varchar('payment_id').notNull(),
+    userId: varchar('student_id').notNull(),
+    paymentId: varchar('payment_id'),
+    status: enrollmentEnum("enrollment_status").default("pending").notNull(),
     enrolledAt: timestamp('enrolled_at').defaultNow(),
+
 },(table) => [
     index('enrollment_course_id_idx').on(table.courseId),
-    index('enrollment_student_id_idx').on(table.studentId),
-    unique('unique_student_course_enrollment').on(table.courseId, table.studentId),
+    index('enrollment_student_id_idx').on(table.userId),
+    unique('unique_student_course_enrollment').on(table.courseId, table.userId),
     foreignKey({
         name: 'enrollments_course_id_fk',
         columns: [table.courseId],
